@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"strconv"
 )
 
 // creating a struct for type ALBUM
@@ -27,6 +30,7 @@ func main() {
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbumById)
 	router.POST("/albums", postAlbums)
+	router.DELETE("/albums/:index", removeByIndex)
 
 	router.Run("localhost:8080")
 }
@@ -64,4 +68,18 @@ func getAlbumById(c *gin.Context) {
 		}
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}
+
+// attempt to implement HTTP delete
+func removeByIndex(c *gin.Context) {
+	index := c.Param("index")
+	position, error := strconv.Atoi(index)
+	if error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		return
+	}
+	fmt.Println("before ", albums)
+	albums = append(albums[:position], albums[position+1:]...)
+	fmt.Println("after ", albums)
+	c.IndentedJSON(http.StatusOK, albums)
 }
